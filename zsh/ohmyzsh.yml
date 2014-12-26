@@ -1,0 +1,29 @@
+---
+## Install Oh-my-zsh
+
+- hosts: tests
+  user: root
+  #sudo: True
+  connection: ssh # or paramiko
+
+  vars:
+    user: root
+  tasks:
+  - name: Install git and zsh
+    apt: name={{ item }} state=latest update_cache=yes
+    with_items:
+     - git
+     - zsh
+     - git-core
+
+  - name: Clone oh-my-zsh repo
+    git: repo=https://github.com/robbyrussell/oh-my-zsh.git dest=/{{ user }}/.oh-my-zsh
+
+  - name: remove standard zshrc
+    file: path=/{{ user }}/.zshrc state=absent
+
+  - name: deploy .zshrc
+    template: src=~/.zshrc dest=/{{ user }}/.zshrc owner={{ user }}
+
+  - name: Set zsh as default shell
+    user: name={{ user }} shell=/bin/zsh
